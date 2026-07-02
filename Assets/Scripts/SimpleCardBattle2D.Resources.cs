@@ -2,7 +2,7 @@ using UnityEngine;
 
 public partial class SimpleCardBattle2D
 {
-    private Sprite LoadCardSprite(CardDef card)
+    private Sprite LoadCardSprite(CardData card)
     {
         if (string.IsNullOrEmpty(card.ArtPath))
         {
@@ -26,7 +26,7 @@ public partial class SimpleCardBattle2D
         return sprite;
     }
 
-    private Sprite LoadEnemySprite(EnemyDef enemy)
+    private Sprite LoadEnemySprite(EnemyData enemy)
     {
         if (string.IsNullOrEmpty(enemy.ArtPath))
         {

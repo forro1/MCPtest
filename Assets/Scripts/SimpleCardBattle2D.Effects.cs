@@ -1,28 +1,8 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public partial class SimpleCardBattle2D
 {
-    private string BuildCardEffectText(CardDef card)
-    {
-        List<string> parts = new List<string>();
-        if (card.Damage > 0)
-        {
-            parts.Add("伤害 +" + card.Damage);
-        }
-        if (card.Block > 0)
-        {
-            parts.Add("格挡 +" + card.Block);
-        }
-        if (card.Heal > 0)
-        {
-            parts.Add("生命 +" + card.Heal);
-        }
-
-        return "打出「" + card.Name + "」\n" + string.Join("   ", parts.ToArray());
-    }
-
     private void ShowCardEffect(string message, Color color)
     {
         if (effectText == null)

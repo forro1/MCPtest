@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36075fbf4c314f3ba5f649019b6d5646, type: 3}
+  m_Name: PoisonRogue
+  m_EditorClassIdentifier: 
+  Name: 毒刃盗贼
+  MaxHp: 48
+  Tint: {r: 0.42, g: 0.82, b: 0.48, a: 1}
+  ArtPath: Enemies/poison_rogue
+  Cards:
+  - Name: 毒刃
+    Copies: 2
+    Damage: 6
+    Block: 0
+    Heal: 0
+    Description: 造成6点伤害
+    Tint: {r: 0.35, g: 0.85, b: 0.42, a: 1}
+  - Name: 闪避
+    Copies: 2
+    Damage: 0
+    Block: 8
+    Heal: 0
+    Description: 获得8点格挡
+    Tint: {r: 0.38, g: 0.62, b: 0.9, a: 1}
+  - Name: 背刺
+    Copies: 2
+    Damage: 11
+    Block: 0
+    Heal: 0
+    Description: 造成11点伤害
+    Tint: {r: 0.84, g: 0.34, b: 0.38, a: 1}

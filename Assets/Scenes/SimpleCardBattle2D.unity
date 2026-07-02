@@ -240,166 +240,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9e6f0f3351be9a4aa6420bfb2d9fdbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SimpleCardBattle2D
+  battleConfig: {fileID: 11400000, guid: 6c09a0da11bd46dd96e6de2854939e8a, type: 2}
   playerMaxHp: 50
   maxEnergy: 5
   handSize: 5
   enemyHandSize: 1
   startingDeck:
-  - Card:
-      Name: "\u65A9\u51FB"
-      Cost: 1
-      Damage: 6
-      Block: 0
-      Heal: 0
-      Description: "\u9020\u62106\u70B9\u4F24\u5BB3"
-      Tint: {r: 0.9, g: 0.34, b: 0.3, a: 1}
-      ArtPath: Cards/card_strike_attack
+  - Card: {fileID: 11400000, guid: 1f2733aa5aa947f7ace80ba5be8c90fa, type: 2}
     Count: 5
-  - Card:
-      Name: "\u683C\u6321"
-      Cost: 1
-      Damage: 0
-      Block: 6
-      Heal: 0
-      Description: "\u83B7\u5F976\u70B9\u683C\u6321"
-      Tint: {r: 0.3, g: 0.52, b: 0.86, a: 1}
-      ArtPath: Cards/card_guard_defense
+  - Card: {fileID: 11400000, guid: 8b1f6ac9c00648e68464eef76cac8c57, type: 2}
     Count: 4
-  - Card:
-      Name: "\u706B\u82B1"
-      Cost: 0
-      Damage: 3
-      Block: 0
-      Heal: 0
-      Description: "\u9020\u62103\u70B9\u4F24\u5BB3"
-      Tint: {r: 0.95, g: 0.76, b: 0.28, a: 1}
-      ArtPath: Cards/card_spark_fire
+  - Card: {fileID: 11400000, guid: 835569ddd32c45be8c8735bf6c8fdfaf, type: 2}
     Count: 2
-  - Card:
-      Name: "\u6CBB\u7597"
-      Cost: 1
-      Damage: 0
-      Block: 0
-      Heal: 5
-      Description: "\u6062\u590D5\u70B9\u751F\u547D"
-      Tint: {r: 0.35, g: 0.74, b: 0.45, a: 1}
-      ArtPath: Cards/card_mend_heal
+  - Card: {fileID: 11400000, guid: e87a2f56612c48b29fea03e45b18ee83, type: 2}
     Count: 1
-  - Card:
-      Name: "\u91CD\u51FB"
-      Cost: 2
-      Damage: 12
-      Block: 0
-      Heal: 0
-      Description: "\u9020\u621012\u70B9\u4F24\u5BB3"
-      Tint: {r: 0.72, g: 0.36, b: 0.76, a: 1}
-      ArtPath: Cards/card_bash_heavy
+  - Card: {fileID: 11400000, guid: 3a4a34c15de14cd8a5e1efbc5fa3a1ea, type: 2}
     Count: 1
   stages:
-  - Name: "\u8BAD\u7EC3\u5047\u4EBA"
-    MaxHp: 42
-    Tint: {r: 0.72, g: 0.68, b: 0.56, a: 1}
-    ArtPath: Enemies/training_dummy
-    Cards:
-    - Name: "\u6728\u69CC"
-      Copies: 2
-      Damage: 7
-      Block: 0
-      Heal: 0
-      Description: "\u9020\u62107\u70B9\u4F24\u5BB3"
-      Tint: {r: 0.8, g: 0.58, b: 0.34, a: 1}
-    - Name: "\u786C\u5316\u6728\u76AE"
-      Copies: 2
-      Damage: 0
-      Block: 5
-      Heal: 0
-      Description: "\u83B7\u5F975\u70B9\u683C\u6321"
-      Tint: {r: 0.58, g: 0.66, b: 0.44, a: 1}
-    - Name: "\u7B28\u62D9\u649E\u51FB"
-      Copies: 2
-      Damage: 9
-      Block: 0
-      Heal: 0
-      Description: "\u9020\u62109\u70B9\u4F24\u5BB3"
-      Tint: {r: 0.88, g: 0.48, b: 0.3, a: 1}
-  - Name: "\u6BD2\u5203\u76D7\u8D3C"
-    MaxHp: 48
-    Tint: {r: 0.42, g: 0.82, b: 0.48, a: 1}
-    ArtPath: Enemies/poison_rogue
-    Cards:
-    - Name: "\u6BD2\u5203"
-      Copies: 2
-      Damage: 6
-      Block: 0
-      Heal: 0
-      Description: "\u9020\u62106\u70B9\u4F24\u5BB3"
-      Tint: {r: 0.35, g: 0.85, b: 0.42, a: 1}
-    - Name: "\u95EA\u907F"
-      Copies: 2
-      Damage: 0
-      Block: 8
-      Heal: 0
-      Description: "\u83B7\u5F978\u70B9\u683C\u6321"
-      Tint: {r: 0.38, g: 0.62, b: 0.9, a: 1}
-    - Name: "\u80CC\u523A"
-      Copies: 2
-      Damage: 11
-      Block: 0
-      Heal: 0
-      Description: "\u9020\u621011\u70B9\u4F24\u5BB3"
-      Tint: {r: 0.84, g: 0.34, b: 0.38, a: 1}
-  - Name: "\u77F3\u7532\u5B88\u536B"
-    MaxHp: 60
-    Tint: {r: 0.62, g: 0.66, b: 0.74, a: 1}
-    ArtPath: Enemies/stone_guardian
-    Cards:
-    - Name: "\u76FE\u51FB"
-      Copies: 2
-      Damage: 8
-      Block: 4
-      Heal: 0
-      Description: "\u9020\u62108\u70B9\u4F24\u5BB3\u5E76\u83B7\u5F974\u70B9\u683C\u6321"
-      Tint: {r: 0.54, g: 0.58, b: 0.72, a: 1}
-    - Name: "\u77F3\u80A4"
-      Copies: 2
-      Damage: 0
-      Block: 12
-      Heal: 0
-      Description: "\u83B7\u5F9712\u70B9\u683C\u6321"
-      Tint: {r: 0.44, g: 0.48, b: 0.58, a: 1}
-    - Name: "\u91CD\u78BE"
-      Copies: 2
-      Damage: 14
-      Block: 0
-      Heal: 0
-      Description: "\u9020\u621014\u70B9\u4F24\u5BB3"
-      Tint: {r: 0.72, g: 0.42, b: 0.34, a: 1}
-  - Name: "\u70C8\u7130\u672F\u58EB"
-    MaxHp: 54
-    Tint: {r: 0.95, g: 0.42, b: 0.22, a: 1}
-    ArtPath: Enemies/flame_warlock
-    Cards:
-    - Name: "\u706B\u7403"
-      Copies: 2
-      Damage: 12
-      Block: 0
-      Heal: 0
-      Description: "\u9020\u621012\u70B9\u4F24\u5BB3"
-      Tint: {r: 0.96, g: 0.38, b: 0.2, a: 1}
-    - Name: "\u706B\u7130\u62A4\u76FE"
-      Copies: 2
-      Damage: 0
-      Block: 7
-      Heal: 0
-      Description: "\u83B7\u5F977\u70B9\u683C\u6321"
-      Tint: {r: 0.92, g: 0.55, b: 0.18, a: 1}
-    - Name: "\u6C72\u53D6\u4F59\u70EC"
-      Copies: 2
-      Damage: 5
-      Block: 0
-      Heal: 5
-      Description: "\u9020\u62105\u70B9\u4F24\u5BB3\u5E76\u6062\u590D5\u70B9\u751F\u547D"
-      Tint: {r: 0.92, g: 0.3, b: 0.48, a: 1}
+  - {fileID: 11400000, guid: 3e06d8442e9f4760bc25c75b2dea11f3, type: 2}
+  - {fileID: 11400000, guid: 8ff90c61d30348cdb66df032d864d30c, type: 2}
+  - {fileID: 11400000, guid: af2b40e17c1645c6b897d52d9afad190, type: 2}
+  - {fileID: 11400000, guid: 4ce177894fa6453daa168d433420ce64, type: 2}
 --- !u!4 &1244269566
 Transform:
   m_ObjectHideFlags: 0

@@ -108,53 +108,74 @@ public partial class SimpleCardBattle2D
 
     private void RefreshUi()
     {
-        EnemyDef enemy = stages[Mathf.Clamp(stageIndex, 0, stages.Count - 1)];
-        int stageDisplay = Mathf.Min(stageIndex + 1, stages.Count);
-        playerText.text = "玩家\n生命 " + playerHp + "/" + playerMaxHp + "   格挡 " + playerBlock;
-        enemyText.text = "阶段 " + stageDisplay + "/" + stages.Count + "  " + enemy.Name + "\n生命 " + enemyHp + "/" + enemyMaxHp + "   格挡 " + enemyBlock + "   意图 " + enemyIntent + " 点伤害";
-        enemyHandText.text = "敌人手牌：" + EnemyHandLabels();
-        enemyArtImage.sprite = LoadEnemySprite(enemy);
-        enemyArtImage.color = enemyArtImage.sprite == null ? new Color(1f, 1f, 1f, 0f) : Color.white;
-        statusText.text = "能量 " + energy + "/" + maxEnergy + "\n第 " + turn + " 回合";
-        drawPileText.text = "牌库\n" + deck.Count;
-        discardPileText.text = "弃牌\n" + discard.Count;
-        endTurnButton.GetComponentInChildren<Text>().text = gameOver ? "重新开始" : "结束回合";
+        playerText.text = "玩家\n生命 " + battleState.PlayerHp + "/" + battleState.PlayerMaxHp + "   格挡 " + battleState.PlayerBlock;
+
+        if (battleState.StageIndex >= battleState.Stages.Count)
+        {
+            enemyText.text = "阶段 " + battleState.Stages.Count + "/" + battleState.Stages.Count + "  已通关\n生命 0/0   格挡 0   意图 0 点伤害";
+            enemyHandText.text = "敌人手牌：无";
+            enemyArtImage.sprite = null;
+            enemyArtImage.color = new Color(1f, 1f, 1f, 0f);
+        }
+        else
+        {
+            EnemyData enemy = battleState.Stages[Mathf.Clamp(battleState.StageIndex, 0, battleState.Stages.Count - 1)].Enemy;
+            if (enemy == null)
+            {
+                enemyText.text = "阶段配置缺失\n生命 0/0   格挡 0   意图 0 点伤害";
+                enemyHandText.text = "敌人手牌：无";
+                enemyArtImage.sprite = null;
+                enemyArtImage.color = new Color(1f, 1f, 1f, 0f);
+                return;
+            }
+
+            int stageDisplay = Mathf.Min(battleState.StageIndex + 1, battleState.Stages.Count);
+            enemyText.text = "阶段 " + stageDisplay + "/" + battleState.Stages.Count + "  " + enemy.Name + "\n生命 " + battleState.EnemyHp + "/" + battleState.EnemyMaxHp + "   格挡 " + battleState.EnemyBlock + "   意图 " + battleState.EnemyIntent + " 点伤害";
+            enemyHandText.text = "敌人手牌：" + EnemyHandLabels();
+            enemyArtImage.sprite = LoadEnemySprite(enemy);
+            enemyArtImage.color = enemyArtImage.sprite == null ? new Color(1f, 1f, 1f, 0f) : Color.white;
+        }
+
+        statusText.text = "能量 " + battleState.Energy + "/" + battleState.MaxEnergy + "\n第 " + battleState.Turn + " 回合";
+        drawPileText.text = "牌库\n" + battleState.PlayerDeck.DrawPile.Count;
+        discardPileText.text = "弃牌\n" + battleState.PlayerDeck.DiscardPile.Count;
+        endTurnButton.GetComponentInChildren<Text>().text = battleState.GameOver ? "重新开始" : "结束回合";
 
         foreach (Transform child in handRoot)
         {
             Destroy(child.gameObject);
         }
 
-        for (int i = 0; i < hand.Count; i++)
+        for (int i = 0; i < battleState.PlayerDeck.Hand.Count; i++)
         {
             int cardIndex = i;
-            CardDef card = hand[i];
+            CardData card = battleState.PlayerDeck.Hand[i];
             Button button = CreateCardButton(handRoot, card);
             RectTransform rect = button.GetComponent<RectTransform>();
             rect.sizeDelta = new Vector2(170f, 226f);
-            button.interactable = !gameOver && energy >= card.Cost;
+            button.interactable = !battleState.GameOver && battleState.Energy >= card.Cost;
             button.onClick.AddListener(() => PlayCard(cardIndex));
         }
 
-        logText.text = string.Join("\n", logLines.ToArray());
+        logText.text = string.Join("\n", battleState.LogLines.ToArray());
     }
 
-    private string CardLabel(CardDef card)
+    private string CardLabel(CardData card)
     {
         return card.Name + "\n费用 " + card.Cost + "\n\n" + card.Description;
     }
 
     private string EnemyHandNames()
     {
-        if (enemyHand.Count == 0)
+        if (battleState.EnemyDeck.Hand.Count == 0)
         {
             return "无";
         }
 
         List<string> names = new List<string>();
-        for (int i = 0; i < enemyHand.Count; i++)
+        for (int i = 0; i < battleState.EnemyDeck.Hand.Count; i++)
         {
-            names.Add("「" + enemyHand[i].Name + "」");
+            names.Add("「" + battleState.EnemyDeck.Hand[i].Name + "」");
         }
 
         return string.Join("、", names.ToArray());
@@ -162,15 +183,15 @@ public partial class SimpleCardBattle2D
 
     private string EnemyHandLabels()
     {
-        if (enemyHand.Count == 0)
+        if (battleState.EnemyDeck.Hand.Count == 0)
         {
             return "无";
         }
 
         List<string> labels = new List<string>();
-        for (int i = 0; i < enemyHand.Count; i++)
+        for (int i = 0; i < battleState.EnemyDeck.Hand.Count; i++)
         {
-            EnemyCardDef card = enemyHand[i];
+            EnemyActionData card = battleState.EnemyDeck.Hand[i];
             labels.Add(card.Name + "(" + card.Description + ")");
         }
 
@@ -197,7 +218,7 @@ public partial class SimpleCardBattle2D
         return button;
     }
 
-    private Button CreateCardButton(Transform parent, CardDef card)
+    private Button CreateCardButton(Transform parent, CardData card)
     {
         Sprite cardSprite = LoadCardSprite(card);
         if (cardSprite == null)
