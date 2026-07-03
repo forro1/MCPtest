@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 public partial class SimpleCardBattle2D
 {
+    [Header("Phase 1")]
+    [SerializeField] private bool usePhaseOneLoop = true;
+
     [Header("战斗配置")]
     [SerializeField] private BattleConfig battleConfig;
 
