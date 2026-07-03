@@ -45,4 +45,33 @@ public class LegacyEchoTests
         Assert.AreEqual(1, village.TrainingLevel);
         Assert.AreEqual(40, traveler.MaxHp);
     }
+
+    [Test]
+    public void ResearchClaimCapsTrainingGrowth()
+    {
+        VillageState village = new VillageState();
+        TravelerRun traveler = new TravelerRun(4, 40, new[] { "Strike" });
+
+        for (int i = 0; i < 5; i++)
+        {
+            LegacyEcho echo = new LegacyEcho("echo-" + i, i, "mist-woods", "Overwhelmed", "Legacy vigor");
+            LegacyEchoResolver.ResolveResearch(echo, traveler, village);
+        }
+
+        Assert.AreEqual(LegacyEchoResolver.MaxTrainingLevel, village.TrainingLevel);
+    }
+
+    [Test]
+    public void ResearchClaimCanDispatchUnlockCardEffect()
+    {
+        VillageState village = new VillageState();
+        TravelerRun traveler = new TravelerRun(4, 40, new[] { "Strike" });
+        LegacyEcho echo = new LegacyEcho("echo-card", 3, "mist-woods", "Overwhelmed", "Legacy card");
+        echo.ResearchEffect = "unlock_card:EchoStrike";
+
+        LegacyEchoResolver.ResolveResearch(echo, traveler, village);
+
+        Assert.Contains("EchoStrike", village.UnlockedCardIds);
+        Assert.AreEqual(0, village.TrainingLevel);
+    }
 }

@@ -37,6 +37,17 @@ public class ExplorationMapTests
     }
 
     [Test]
+    public void SeededExplorationMapAppliesReproducibleIntelBias()
+    {
+        ExplorationMap first = ExplorationMap.CreatePhaseOneTemplate(includeLegacyEcho: true, seed: 7);
+        ExplorationMap second = ExplorationMap.CreatePhaseOneTemplate(includeLegacyEcho: true, seed: 7);
+
+        Assert.AreEqual(first.Nodes[1].ActualRiskLevel, second.Nodes[1].ActualRiskLevel);
+        Assert.AreEqual(first.Nodes[1].ActualRewardLevel, second.Nodes[1].ActualRewardLevel);
+        Assert.IsTrue(first.Nodes.Any(n => n.HasRewardRiskMismatch || n.DisplayedNodeType != n.ActualNodeType));
+    }
+
+    [Test]
     public void ExplorationControllerReturnsNodeResultWhenEnteringReachableNode()
     {
         ExplorationMap map = ExplorationMap.CreatePhaseOneTemplate(includeLegacyEcho: true);
@@ -47,6 +58,7 @@ public class ExplorationMapTests
 
         Assert.AreEqual(next.NodeId, result.Node.NodeId);
         Assert.AreEqual(next.ActualNodeType, result.ResultType);
+        Assert.IsNotEmpty(result.IntelComparisonText);
         Assert.AreEqual(next.NodeId, controller.CurrentNodeId);
     }
 }

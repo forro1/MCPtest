@@ -1,5 +1,7 @@
 public static class LegacyEchoResolver
 {
+    public const int MaxTrainingLevel = 3;
+
     public static bool ResolveImmediate(LegacyEcho echo, TravelerRun traveler, VillageState village)
     {
         if (!CanResolve(echo))
@@ -26,7 +28,7 @@ public static class LegacyEchoResolver
 
         if (village != null)
         {
-            village.TrainingLevel += 1;
+            ApplyResearchEffect(echo, village);
         }
 
         if (traveler != null)
@@ -41,5 +43,24 @@ public static class LegacyEchoResolver
     private static bool CanResolve(LegacyEcho echo)
     {
         return echo != null && !echo.IsRecovered;
+    }
+
+    private static void ApplyResearchEffect(LegacyEcho echo, VillageState village)
+    {
+        string effect = string.IsNullOrEmpty(echo.ResearchEffect) ? "training_level" : echo.ResearchEffect;
+        if (effect.StartsWith("unlock_card:"))
+        {
+            string cardId = effect.Substring("unlock_card:".Length);
+            if (!string.IsNullOrEmpty(cardId) && !village.UnlockedCardIds.Contains(cardId))
+            {
+                village.UnlockedCardIds.Add(cardId);
+            }
+            return;
+        }
+
+        if (effect == "training_level")
+        {
+            village.TrainingLevel = System.Math.Min(MaxTrainingLevel, village.TrainingLevel + 1);
+        }
     }
 }

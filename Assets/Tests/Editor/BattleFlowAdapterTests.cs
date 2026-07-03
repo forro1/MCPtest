@@ -89,6 +89,24 @@ public class BattleFlowAdapterTests
         Assert.AreEqual(19, result.RemainingHp);
     }
 
+    [Test]
+    public void PhaseOneBattleRequestUsesTravelerAndNodeData()
+    {
+        TravelerRun traveler = new TravelerRun(2, 44, new[] { "Strike", "Guard" });
+        traveler.ActiveTableAbilityIds.Add("memory_spark");
+        MapNodeIntel node = new MapNodeIntel("battle-1", "mist-woods", MapNodeType.Battle, MapNodeType.Battle, 3, 2, 70, "Old route");
+        node.ActualRiskLevel = 4;
+
+        BattleRunRequest request = BattleRunRequestFactory.CreatePhaseOneRequest(traveler, node);
+
+        Assert.AreEqual(44, request.PlayerMaxHp);
+        Assert.AreEqual(44, request.PlayerCurrentHp);
+        Assert.Contains("memory_spark", request.TableAbilityIds);
+        Assert.Greater(request.Stages[0].Enemy.MaxHp, 0);
+        Assert.Greater(request.Stages[0].Enemy.Cards[0].Damage, 0);
+        Assert.GreaterOrEqual(request.StartingDeck.Count, 2);
+    }
+
     private static int FixedShuffle(int minInclusive, int maxExclusive)
     {
         return minInclusive;

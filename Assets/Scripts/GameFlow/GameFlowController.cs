@@ -1,3 +1,5 @@
+using System;
+
 public class GameFlowController
 {
     public VillageState Village { get; private set; }
@@ -60,11 +62,11 @@ public class GameFlowController
     {
         if (CurrentTraveler == null)
         {
-            StartNewTraveler();
+            throw new InvalidOperationException("Cannot mark traveler dead without an active traveler.");
         }
 
         CurrentTraveler.MarkDead(reason, regionId);
-        Village.AddTravelerRecord(new TravelerRecord(CurrentTraveler.TravelerId, reason, regionId));
+        Village.AddTravelerRecord(TravelerRecord.FromTraveler(CurrentTraveler));
         LegacyEcho echo = LegacyEchoFactory.CreateFromDeath(CurrentTraveler);
         Village.AddLegacyEcho(echo);
         Phase = GamePhase.RunSummary;

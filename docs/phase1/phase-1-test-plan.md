@@ -244,7 +244,7 @@ npx unity-mcp-cli run-tool tests-run --input '{"testMode":"EditMode","includePas
 
 结果：
 
-- EditMode 测试通过：26/26。
+- EditMode 测试通过：31/31。
 - 现有 `CardBattleRuntimeTests` 通过，未发现旧战斗运行时测试退化。
 - 新增测试覆盖：
   - `GenerationalLoopTests`
@@ -267,6 +267,10 @@ npx unity-mcp-cli run-tool tests-run --input '{"testMode":"EditMode","includePas
 - 旅行者编号在死亡记录生成前也不会重复。
 - 牌桌能力会进入旅行者运行时，并在战斗适配层产生最小效果。
 - 战斗自动适配达到回合上限时会返回确定的失败结果，避免流程卡在战斗阶段。
+- 死亡记录会快照牌组、遗物、牌桌能力和确认地图情报。
+- 研究效果支持训练等级上限和卡牌解锁分发。
+- 地图模板支持固定种子的风险/收益偏差，并输出“情报预测 vs 实际结果”文案。
+- Phase 1 战斗请求由 `BattleRunRequestFactory` 统一构建，供 UI 和适配层后续复用。
 
 ### 2026-07-03 手动/运行时验证
 

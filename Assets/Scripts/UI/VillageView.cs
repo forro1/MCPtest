@@ -51,6 +51,10 @@ public class VillageView : MonoBehaviour
         SetText(TravelerCountText, "旅行者数量：" + (village == null ? 0 : village.TravelerRecords.Count));
         SetText(UnrecoveredEchoCountText, "未找回回声：" + CountUnrecoveredEchoes(village));
         SetText(CurrentTravelerText, BuildTravelerSummary(traveler));
+        if (ViewMapButton != null)
+        {
+            ViewMapButton.interactable = traveler != null;
+        }
     }
 
     private void BindButtons()

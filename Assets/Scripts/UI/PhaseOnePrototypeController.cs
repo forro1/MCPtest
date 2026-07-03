@@ -142,7 +142,8 @@ public class PhaseOnePrototypeController : MonoBehaviour
     {
         if (flow.CurrentTraveler == null)
         {
-            flow.StartNewTraveler();
+            ShowVillage();
+            return;
         }
 
         currentNode = null;
@@ -156,7 +157,7 @@ public class PhaseOnePrototypeController : MonoBehaviour
     {
         ExplorationNodeResult result = flow.EnterNode(nodeId);
         currentNode = result.Node;
-        nodeResultText.text = "实际进入：" + result.ResultType + "，来源：" + currentNode.IntelSource;
+        nodeResultText.text = result.IntelComparisonText + "\n来源：" + currentNode.IntelSource;
 
         if (result.ResultType == MapNodeType.Battle)
         {
@@ -195,11 +196,7 @@ public class PhaseOnePrototypeController : MonoBehaviour
 
     private void StartManualBattle()
     {
-        BattleRunRequest request = CreateDemoBattleRequest(true);
-        if (flow.CurrentTraveler != null)
-        {
-            request.TableAbilityIds.AddRange(flow.CurrentTraveler.ActiveTableAbilityIds);
-        }
+        BattleRunRequest request = BattleRunRequestFactory.CreatePhaseOneRequest(flow.CurrentTraveler, currentNode);
 
         manualBattleState = new BattleState();
         manualBattleController = new TurnController(manualBattleState, Random.Range);
@@ -357,34 +354,6 @@ public class PhaseOnePrototypeController : MonoBehaviour
             flow.StartNewTraveler();
             ShowMap();
         });
-    }
-
-    private BattleRunRequest CreateDemoBattleRequest(bool victory)
-    {
-        CardData card = ScriptableObject.CreateInstance<CardData>();
-        card.Name = victory ? "回声斩击" : "迟疑防守";
-        card.Cost = 1;
-        card.Damage = victory ? 12 : 0;
-        card.Block = 0;
-        card.Heal = 0;
-        card.Description = victory ? "造成12点伤害" : "没有造成伤害";
-        card.Effects = CardEffectData.FromLegacyValues(card.Damage, card.Block, card.Heal);
-        card.Tint = victory ? new Color(0.82f, 0.36f, 0.30f) : new Color(0.34f, 0.48f, 0.70f);
-
-        EnemyActionData action = victory
-            ? new EnemyActionData("观望", 0, 0, 0, "无行动", Color.white)
-            : new EnemyActionData("压倒打击", 50, 0, 0, "造成50点伤害", Color.white);
-        EnemyData enemy = ScriptableObject.CreateInstance<EnemyData>();
-        enemy.Name = victory ? "迷雾残影" : "压迫残影";
-        enemy.MaxHp = victory ? 12 : 40;
-        enemy.Tint = Color.gray;
-        enemy.Cards = new List<EnemyActionData> { action };
-        StageData stage = ScriptableObject.CreateInstance<StageData>();
-        stage.Enemy = enemy;
-
-        int hp = flow.CurrentTraveler == null ? 50 : flow.CurrentTraveler.CurrentHp;
-        int maxHp = flow.CurrentTraveler == null ? 50 : flow.CurrentTraveler.MaxHp;
-        return new BattleRunRequest(maxHp, hp, 3, 1, 1, new List<DeckEntry> { new DeckEntry(card, 1) }, new List<StageData> { stage });
     }
 
     private LegacyEcho FirstVisibleEcho()

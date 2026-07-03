@@ -8,6 +8,8 @@ public class MapNodeIntel
     public MapNodeType ActualNodeType;
     public int RiskLevel;
     public int RewardLevel;
+    public int ActualRiskLevel;
+    public int ActualRewardLevel;
     public int Reliability;
     public string IntelSource;
     public bool CanMisreadNodeType;
@@ -31,8 +33,15 @@ public class MapNodeIntel
         ActualNodeType = actualNodeType;
         RiskLevel = riskLevel;
         RewardLevel = rewardLevel;
+        ActualRiskLevel = riskLevel;
+        ActualRewardLevel = rewardLevel;
         Reliability = ClampReliability(reliability);
         IntelSource = intelSource;
+    }
+
+    public bool HasRewardRiskMismatch
+    {
+        get { return RiskLevel != ActualRiskLevel || RewardLevel != ActualRewardLevel; }
     }
 
     public bool IsUnreliable

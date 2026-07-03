@@ -116,15 +116,31 @@ public class GenerationalLoopTests
     public void GameFlowConsumesDefeatBattleResultAsDeathSettlement()
     {
         GameFlowController flow = new GameFlowController(new VillageState());
-        flow.StartNewTraveler();
+        TravelerRun traveler = flow.StartNewTraveler();
+        traveler.RelicIds.Add("old_coin");
+        traveler.ActiveTableAbilityIds.Add("memory_spark");
+        traveler.ConfirmedIntelIds.Add("battle-1");
         BattleRunResult result = new BattleRunResult(false, true, 0, "Defeated in battle");
 
         flow.ApplyBattleResult(result, "mist-woods");
 
         Assert.AreEqual(GamePhase.RunSummary, flow.Phase);
         Assert.AreEqual(1, flow.Village.TravelerRecords.Count);
-        Assert.AreEqual("Defeated in battle", flow.Village.TravelerRecords[0].DeathReason);
+        TravelerRecord record = flow.Village.TravelerRecords[0];
+        Assert.AreEqual("Defeated in battle", record.DeathReason);
+        Assert.Contains("Strike", record.DeckCardIds);
+        Assert.Contains("old_coin", record.RelicIds);
+        Assert.Contains("memory_spark", record.TableAbilityIds);
+        Assert.Contains("battle-1", record.ConfirmedIntelIds);
         Assert.AreEqual(1, flow.Village.LegacyEchoes.Count);
+    }
+
+    [Test]
+    public void MarkTravelerDeadRequiresAnActiveTraveler()
+    {
+        GameFlowController flow = new GameFlowController(new VillageState());
+
+        Assert.Throws<System.InvalidOperationException>(() => flow.MarkTravelerDead("Invalid", "mist-woods"));
     }
 
     [Test]

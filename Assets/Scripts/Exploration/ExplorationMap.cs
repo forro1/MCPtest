@@ -11,6 +11,11 @@ public class ExplorationMap
 
     public static ExplorationMap CreatePhaseOneTemplate(bool includeLegacyEcho)
     {
+        return CreatePhaseOneTemplate(includeLegacyEcho, 0);
+    }
+
+    public static ExplorationMap CreatePhaseOneTemplate(bool includeLegacyEcho, int seed)
+    {
         ExplorationMap map = new ExplorationMap();
         MapNodeIntel start = new MapNodeIntel("start", "village-road", MapNodeType.Start, MapNodeType.Start, 0, 0, 100, "Village");
         MapNodeIntel battle = new MapNodeIntel("battle-1", "mist-woods", MapNodeType.Battle, MapNodeType.Battle, 2, 2, 80, "Old route");
@@ -21,6 +26,7 @@ public class ExplorationMap
 
         eventNode.CanMisreadRewardRisk = true;
         echo.CanMisreadNodeType = !includeLegacyEcho;
+        ApplySeededBias(new List<MapNodeIntel> { battle, eventNode, rest, echo, end }, seed);
 
         start.ReachableNodeIds.Add(battle.NodeId);
         start.ReachableNodeIds.Add(eventNode.NodeId);
@@ -36,6 +42,50 @@ public class ExplorationMap
         map.Nodes.Add(echo);
         map.Nodes.Add(end);
         return map;
+    }
+
+    private static void ApplySeededBias(List<MapNodeIntel> nodes, int seed)
+    {
+        System.Random random = new System.Random(seed);
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            MapNodeIntel node = nodes[i];
+            if (node.Reliability >= 90)
+            {
+                continue;
+            }
+
+            int riskDelta = random.Next(-1, 2);
+            int rewardDelta = random.Next(-1, 2);
+            node.ActualRiskLevel = ClampLevel(node.RiskLevel + riskDelta);
+            node.ActualRewardLevel = ClampLevel(node.RewardLevel + rewardDelta);
+            if (riskDelta != 0 || rewardDelta != 0)
+            {
+                node.CanMisreadRewardRisk = true;
+            }
+        }
+
+        // Keep one deterministic visible mismatch in the template so the UI has a Phase 1 signal to explain.
+        if (nodes.Count > 1 && !nodes[1].HasRewardRiskMismatch)
+        {
+            nodes[1].ActualRiskLevel = ClampLevel(nodes[1].RiskLevel + 1);
+            nodes[1].CanMisreadRewardRisk = true;
+        }
+    }
+
+    private static int ClampLevel(int value)
+    {
+        if (value < 0)
+        {
+            return 0;
+        }
+
+        if (value > 5)
+        {
+            return 5;
+        }
+
+        return value;
     }
 
     public MapNodeIntel FindNode(string nodeId)

@@ -240,6 +240,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9e6f0f3351be9a4aa6420bfb2d9fdbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SimpleCardBattle2D
+  usePhaseOneLoop: 1
   battleConfig: {fileID: 11400000, guid: 6c09a0da11bd46dd96e6de2854939e8a, type: 2}
   playerMaxHp: 50
   maxEnergy: 5
