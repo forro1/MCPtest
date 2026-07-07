@@ -35,14 +35,14 @@ public static class BattleRunRequestFactory
         switch (cardId)
         {
             case "Guard":
-                return CreateCard("Guard", 1, 0, 6, 0, "Gain 6 block", new Color(0.30f, 0.52f, 0.86f));
+                return CreateCard("格挡", 1, 0, 6, 0, "获得6点格挡", new Color(0.30f, 0.52f, 0.86f), "Cards/card_guard_defense");
             case "Spark":
-                return CreateCard("Spark", 0, 3, 0, 0, "Deal 3 damage", new Color(0.95f, 0.76f, 0.28f));
+                return CreateCard("火花", 0, 3, 0, 0, "造成3点伤害", new Color(0.95f, 0.76f, 0.28f), "Cards/card_spark_fire");
             case "EchoStrike":
-                return CreateCard("Echo Strike", 1, 9, 0, 0, "Deal 9 damage", new Color(0.70f, 0.42f, 0.84f));
+                return CreateCard("回声斩", 1, 9, 0, 0, "造成9点伤害", new Color(0.70f, 0.42f, 0.84f), "Cards/card_bash_heavy");
             case "Strike":
             default:
-                return CreateCard("Strike", 1, 6, 0, 0, "Deal 6 damage", new Color(0.90f, 0.34f, 0.30f));
+                return CreateCard("斩击", 1, 6, 0, 0, "造成6点伤害", new Color(0.90f, 0.34f, 0.30f), "Cards/card_strike_attack");
         }
     }
 
@@ -65,7 +65,7 @@ public static class BattleRunRequestFactory
         return stage;
     }
 
-    private static CardData CreateCard(string name, int cost, int damage, int block, int heal, string description, Color tint)
+    private static CardData CreateCard(string name, int cost, int damage, int block, int heal, string description, Color tint, string artPath)
     {
         CardData card = ScriptableObject.CreateInstance<CardData>();
         card.Name = name;
@@ -76,6 +76,7 @@ public static class BattleRunRequestFactory
         card.Description = description;
         card.Effects = CardEffectData.FromLegacyValues(damage, block, heal);
         card.Tint = tint;
+        card.ArtPath = artPath;
         return card;
     }
 }

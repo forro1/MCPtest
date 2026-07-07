@@ -113,6 +113,23 @@ public class GenerationalLoopTests
     }
 
     [Test]
+    public void ImmediateEchoPickupCollectsPreviousTravelerRelics()
+    {
+        GameFlowController flow = new GameFlowController(new VillageState());
+        TravelerRun first = flow.StartNewTraveler();
+        first.RelicIds.Add("old_coin");
+        first.RelicIds.Add("cracked_ring");
+        flow.MarkTravelerDead("Test death", "mist-woods");
+        TravelerRun second = flow.StartNewTraveler();
+
+        bool resolved = flow.ResolveVisibleEcho(immediate: true);
+
+        Assert.IsTrue(resolved);
+        Assert.Contains("old_coin", second.RelicIds);
+        Assert.Contains("cracked_ring", second.RelicIds);
+    }
+
+    [Test]
     public void GameFlowConsumesDefeatBattleResultAsDeathSettlement()
     {
         GameFlowController flow = new GameFlowController(new VillageState());

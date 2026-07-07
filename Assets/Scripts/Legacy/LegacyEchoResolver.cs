@@ -12,6 +12,7 @@ public static class LegacyEchoResolver
         if (traveler != null)
         {
             traveler.IncreaseMaxHp(5, true);
+            CollectSourceTravelerRelics(echo, traveler, village);
             traveler.FoundLegacyEchoIds.Add(echo.EchoId);
         }
 
@@ -43,6 +44,34 @@ public static class LegacyEchoResolver
     private static bool CanResolve(LegacyEcho echo)
     {
         return echo != null && !echo.IsRecovered;
+    }
+
+    private static void CollectSourceTravelerRelics(LegacyEcho echo, TravelerRun traveler, VillageState village)
+    {
+        if (village == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < village.TravelerRecords.Count; i++)
+        {
+            TravelerRecord record = village.TravelerRecords[i];
+            if (record.TravelerId != echo.SourceTravelerId)
+            {
+                continue;
+            }
+
+            for (int relicIndex = 0; relicIndex < record.RelicIds.Count; relicIndex++)
+            {
+                string relicId = record.RelicIds[relicIndex];
+                if (!string.IsNullOrEmpty(relicId) && !traveler.RelicIds.Contains(relicId))
+                {
+                    traveler.RelicIds.Add(relicId);
+                }
+            }
+
+            return;
+        }
     }
 
     private static void ApplyResearchEffect(LegacyEcho echo, VillageState village)

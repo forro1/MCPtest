@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 public class MapNodeIntel
 {
@@ -12,6 +13,7 @@ public class MapNodeIntel
     public int ActualRewardLevel;
     public int Reliability;
     public string IntelSource;
+    public Vector2 MapPosition;
     public bool CanMisreadNodeType;
     public bool CanMisreadRoute;
     public bool CanMisreadRewardRisk;

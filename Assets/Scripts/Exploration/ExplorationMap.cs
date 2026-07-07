@@ -24,6 +24,13 @@ public class ExplorationMap
         MapNodeIntel echo = new MapNodeIntel("echo-1", "mist-woods", MapNodeType.LegacyEcho, includeLegacyEcho ? MapNodeType.LegacyEcho : MapNodeType.Event, 1, 3, 55, "Legacy clue");
         MapNodeIntel end = new MapNodeIntel("end-1", "old-gate", MapNodeType.RegionEnd, MapNodeType.RegionEnd, 3, 3, 70, "Village estimate");
 
+        start.MapPosition = new UnityEngine.Vector2(-327f, -142f);
+        battle.MapPosition = new UnityEngine.Vector2(-65f, 27f);
+        eventNode.MapPosition = new UnityEngine.Vector2(-253f, -19f);
+        rest.MapPosition = new UnityEngine.Vector2(200f, -142f);
+        echo.MapPosition = new UnityEngine.Vector2(332f, -6f);
+        end.MapPosition = new UnityEngine.Vector2(255f, 223f);
+
         eventNode.CanMisreadRewardRisk = true;
         echo.CanMisreadNodeType = !includeLegacyEcho;
         ApplySeededBias(new List<MapNodeIntel> { battle, eventNode, rest, echo, end }, seed);

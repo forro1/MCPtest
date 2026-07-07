@@ -2,9 +2,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class PhaseOnePrototypeController : MonoBehaviour
 {
+    private const string ChapterOneMapBackgroundPath = "Assets/Art/Maps/Chapter1/Chapter1_Map_Background_Phase1.png";
+    private static readonly Vector2 ChapterOneMapSize = new Vector2(1080f, 608f);
+
     private GameFlowController flow;
     private Canvas canvas;
     private Font uiFont;
@@ -17,6 +23,7 @@ public class PhaseOnePrototypeController : MonoBehaviour
     private GameObject battlePanel;
     private GameObject echoPanel;
     private GameObject summaryPanel;
+    private Text titleText;
     private Text phaseText;
     private Text nodeResultText;
     private Text battlePlayerText;
@@ -24,9 +31,9 @@ public class PhaseOnePrototypeController : MonoBehaviour
     private Text battleStatusText;
     private Text battleLogText;
     private Transform battleHandRoot;
-    private Button battleCardTemplate;
     private Button endTurnButton;
-    private Button concedeButton;
+    private Button testDeathButton;
+    private readonly Dictionary<string, Sprite> cardSprites = new Dictionary<string, Sprite>();
     private LegacyEcho lastGeneratedEcho;
     private MapNodeIntel currentNode;
     private BattleState manualBattleState;
@@ -43,7 +50,7 @@ public class PhaseOnePrototypeController : MonoBehaviour
 
     private void BuildUi()
     {
-        GameObject canvasObject = new GameObject("Phase 1 Prototype Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+        GameObject canvasObject = new GameObject("Game Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
         canvas = canvasObject.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
@@ -52,8 +59,8 @@ public class PhaseOnePrototypeController : MonoBehaviour
         scaler.matchWidthOrHeight = 0.5f;
 
         CreatePanel(canvasObject.transform, "Background", Stretch(), new Color(0.09f, 0.11f, 0.14f));
-        Text title = CreateText(canvasObject.transform, "Title", "Phase 1 代际循环原型", 34, FontStyle.Bold, new Color(0.96f, 0.86f, 0.62f));
-        SetRect(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -52f), new Vector2(900f, 70f));
+        titleText = CreateText(canvasObject.transform, "Title", "秘法牌桌", 34, FontStyle.Bold, new Color(0.96f, 0.86f, 0.62f));
+        SetRect(titleText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -52f), new Vector2(900f, 70f));
         phaseText = CreateText(canvasObject.transform, "Phase Text", string.Empty, 18, FontStyle.Bold, new Color(0.78f, 0.86f, 0.96f));
         SetRect(phaseText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -112f), new Vector2(900f, 46f));
 
@@ -84,25 +91,48 @@ public class PhaseOnePrototypeController : MonoBehaviour
     private void BuildMapPanel()
     {
         mapView = mapPanel.AddComponent<ExplorationMapView>();
-        mapView.CurrentNodeText = CreatePanelText(mapPanel.transform, "Current Node", new Vector2(-440f, 238f), new Vector2(560f, 48f));
-        mapView.ReachableIntelText = CreatePanelText(mapPanel.transform, "Reachable Intel", new Vector2(-260f, 70f), new Vector2(920f, 260f));
-        mapView.NodeButtonRoot = CreateButtonRoot(mapPanel.transform, "Node Buttons", new Vector2(430f, 50f), new Vector2(360f, 300f));
-        mapView.NodeButtonTemplate = CreateButton(mapView.NodeButtonRoot, "Node Button Template", "进入节点", new Vector2(0f, 108f), new Vector2(300f, 58f), new Color(0.34f, 0.43f, 0.70f));
-        nodeResultText = CreatePanelText(mapPanel.transform, "Node Result", new Vector2(0f, -142f), new Vector2(1040f, 82f));
+        Image mapBackground = CreatePanel(mapPanel.transform, "Chapter 1 Map Background", new Vector2(0.5f, 0.5f), new Color(0.82f, 0.68f, 0.42f, 1f));
+        mapBackground.sprite = LoadChapterOneMapBackground();
+        mapBackground.preserveAspect = true;
+        mapBackground.raycastTarget = false;
+        if (mapBackground.sprite != null)
+        {
+            mapBackground.color = Color.white;
+        }
+
+        SetRect(mapBackground.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-80f, 18f), ChapterOneMapSize);
+
+        mapView.CurrentNodeText = CreatePanelText(mapPanel.transform, "Current Node", new Vector2(-480f, 312f), new Vector2(560f, 42f));
+        mapView.ReachableIntelText = CreatePanelText(mapPanel.transform, "Reachable Intel", new Vector2(456f, 20f), new Vector2(260f, 500f));
+        mapView.NodeButtonRoot = CreateMapNodeRoot(mapPanel.transform, "Node Buttons", new Vector2(-80f, 18f), ChapterOneMapSize);
+        mapView.NodeButtonTemplate = CreateButton(mapView.NodeButtonRoot, "Node Button Template", "进入节点", Vector2.zero, new Vector2(132f, 56f), new Color(0.34f, 0.43f, 0.70f));
+        nodeResultText = CreatePanelText(mapPanel.transform, "Node Result", new Vector2(-80f, -312f), new Vector2(1080f, 64f));
     }
 
     private void BuildBattlePanel()
     {
-        battlePlayerText = CreatePanelText(battlePanel.transform, "Battle Player", new Vector2(-430f, 218f), new Vector2(520f, 58f));
-        battleEnemyText = CreatePanelText(battlePanel.transform, "Battle Enemy", new Vector2(300f, 218f), new Vector2(640f, 58f));
-        battleStatusText = CreatePanelText(battlePanel.transform, "Battle Status", new Vector2(-430f, 140f), new Vector2(520f, 58f));
-        battleLogText = CreatePanelText(battlePanel.transform, "Battle Log", new Vector2(310f, 38f), new Vector2(640f, 250f));
-        battleHandRoot = CreateButtonRoot(battlePanel.transform, "Battle Hand", new Vector2(-260f, -90f), new Vector2(620f, 220f));
-        battleCardTemplate = CreateButton(battleHandRoot, "Battle Card Template", "卡牌", new Vector2(0f, 80f), new Vector2(300f, 56f), new Color(0.48f, 0.40f, 0.68f));
-        endTurnButton = CreateButton(battlePanel.transform, "End Manual Turn", "结束回合", new Vector2(240f, -222f), new Vector2(240f, 64f), new Color(0.82f, 0.50f, 0.24f));
-        concedeButton = CreateButton(battlePanel.transform, "Concede Battle", "放弃并死亡", new Vector2(520f, -222f), new Vector2(240f, 64f), new Color(0.68f, 0.28f, 0.28f));
+        ConfigureBattlePanelAsCanvasSpace();
+
+        battlePlayerText = CreatePanelText(battlePanel.transform, "Battle Player", Vector2.zero, new Vector2(360f, 158f));
+        SetRect(battlePlayerText.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(54f, 72f), new Vector2(360f, 158f));
+        battlePlayerText.alignment = TextAnchor.MiddleLeft;
+
+        battleEnemyText = CreatePanelText(battlePanel.transform, "Battle Enemy", Vector2.zero, new Vector2(760f, 108f));
+        SetRect(battleEnemyText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -104f), new Vector2(760f, 108f));
+        battleEnemyText.alignment = TextAnchor.MiddleCenter;
+
+        battleStatusText = CreatePanelText(battlePanel.transform, "Battle Status", Vector2.zero, new Vector2(1f, 1f));
+        battleStatusText.gameObject.SetActive(false);
+
+        battleLogText = CreatePanelText(battlePanel.transform, "Battle Log", Vector2.zero, new Vector2(440f, 270f));
+        SetRect(battleLogText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-42f, -48f), new Vector2(440f, 270f));
+        battleLogText.alignment = TextAnchor.UpperLeft;
+
+        battleHandRoot = CreateCardHandRoot(battlePanel.transform, "Battle Hand", new Vector2(0f, 44f), new Vector2(980f, 252f));
+        endTurnButton = CreateBattleSideButton(battlePanel.transform, "End Manual Turn", "结束回合", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(620f, 126f), new Vector2(188f, 66f), new Color(0.82f, 0.50f, 0.24f));
+        testDeathButton = CreateBattleSideButton(battlePanel.transform, "Test Death", "测试死亡", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(620f, 50f), new Vector2(188f, 54f), new Color(0.68f, 0.28f, 0.28f));
         endTurnButton.onClick.AddListener(EndManualBattleTurn);
-        concedeButton.onClick.AddListener(ConcedeManualBattle);
+        testDeathButton.onClick.AddListener(TestKillCurrentTraveler);
     }
 
     private void BuildEchoPanel()
@@ -130,7 +160,7 @@ public class PhaseOnePrototypeController : MonoBehaviour
     private void ShowVillage()
     {
         SetActive(villagePanel);
-        phaseText.text = "村庄：查看长期状态，开始或继续代际循环";
+        phaseText.text = "村庄";
         villageView.Bind(flow.Village, flow.CurrentTraveler, delegate
         {
             flow.StartNewTraveler();
@@ -148,7 +178,7 @@ public class PhaseOnePrototypeController : MonoBehaviour
 
         currentNode = null;
         SetActive(mapPanel);
-        phaseText.text = "地图：情报并不完全可靠，选择一个可达节点";
+        phaseText.text = "地图";
         nodeResultText.text = "选择节点后会显示实际结果。";
         mapView.Bind(flow.Exploration, OnNodeSelected);
     }
@@ -189,7 +219,6 @@ public class PhaseOnePrototypeController : MonoBehaviour
     private void ShowBattle()
     {
         SetActive(battlePanel);
-        phaseText.text = "战斗：复用能量、抽牌、出牌、敌人行动与胜负结算";
         StartManualBattle();
         RefreshManualBattle();
     }
@@ -231,22 +260,23 @@ public class PhaseOnePrototypeController : MonoBehaviour
             return;
         }
 
-        battlePlayerText.text = "旅行者 #" + flow.CurrentTraveler.TravelerId + "  生命 "
-            + manualBattleState.PlayerHp + "/" + manualBattleState.PlayerMaxHp
-            + "  格挡 " + manualBattleState.PlayerBlock;
+        battlePlayerText.text = "旅行者 #" + flow.CurrentTraveler.TravelerId
+            + "\n生命 " + manualBattleState.PlayerHp + "/" + manualBattleState.PlayerMaxHp
+            + "\n能量 " + manualBattleState.Energy + "/" + manualBattleState.MaxEnergy
+            + "\n格挡 " + manualBattleState.PlayerBlock;
         string enemyName = "已通关";
         if (manualBattleState.StageIndex >= 0 && manualBattleState.StageIndex < manualBattleState.Stages.Count && manualBattleState.Stages[manualBattleState.StageIndex].Enemy != null)
         {
             enemyName = manualBattleState.Stages[manualBattleState.StageIndex].Enemy.Name;
         }
 
-        battleEnemyText.text = "敌人 " + enemyName + "  生命 "
-            + manualBattleState.EnemyHp + "/" + manualBattleState.EnemyMaxHp
-            + "  格挡 " + manualBattleState.EnemyBlock
-            + "  意图 " + manualBattleState.EnemyIntent;
-        battleStatusText.text = "能量 " + manualBattleState.Energy + "/" + manualBattleState.MaxEnergy
-            + "  回合 " + manualBattleState.Turn;
-        battleLogText.text = string.Join("\n", manualBattleState.LogLines.ToArray());
+        battleEnemyText.text = enemyName
+            + "\n生命 " + manualBattleState.EnemyHp + "/" + manualBattleState.EnemyMaxHp
+            + "   格挡 " + manualBattleState.EnemyBlock
+            + "   意图 " + manualBattleState.EnemyIntent;
+        battleStatusText.text = string.Empty;
+        string log = string.Join("\n", manualBattleState.LogLines.ToArray());
+        battleLogText.text = "战斗细节\n" + (string.IsNullOrEmpty(log) ? "暂无记录" : log);
         RenderBattleHand();
         FinishManualBattleIfGameOver();
     }
@@ -256,22 +286,15 @@ public class PhaseOnePrototypeController : MonoBehaviour
         for (int i = battleHandRoot.childCount - 1; i >= 0; i--)
         {
             Transform child = battleHandRoot.GetChild(i);
-            if (child != battleCardTemplate.transform)
-            {
-                Destroy(child.gameObject);
-            }
+            Destroy(child.gameObject);
         }
 
-        battleCardTemplate.gameObject.SetActive(false);
         for (int i = 0; i < manualBattleState.PlayerDeck.Hand.Count; i++)
         {
             int cardIndex = i;
             CardData card = manualBattleState.PlayerDeck.Hand[i];
-            Button button = Instantiate(battleCardTemplate, battleHandRoot);
+            Button button = CreateBattleCardButton(battleHandRoot, card);
             button.name = "Battle Card " + i;
-            button.gameObject.SetActive(true);
-            Text label = button.GetComponentInChildren<Text>();
-            label.text = card.Name + "  费 " + card.Cost + "\n" + card.Description;
             button.interactable = !manualBattleState.GameOver && manualBattleState.Energy >= card.Cost;
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(delegate
@@ -293,9 +316,14 @@ public class PhaseOnePrototypeController : MonoBehaviour
         RefreshManualBattle();
     }
 
-    private void ConcedeManualBattle()
+    private void TestKillCurrentTraveler()
     {
-        ApplyManualBattleResult(new BattleRunResult(false, true, 0, "Defeated in battle"));
+        if (flow.CurrentTraveler != null && !flow.CurrentTraveler.RelicIds.Contains("test_relic_previous_traveler"))
+        {
+            flow.CurrentTraveler.RelicIds.Add("test_relic_previous_traveler");
+        }
+
+        ApplyManualBattleResult(new BattleRunResult(false, true, 0, "Test death"));
     }
 
     private void FinishManualBattleIfGameOver()
@@ -333,7 +361,7 @@ public class PhaseOnePrototypeController : MonoBehaviour
         }
 
         SetActive(echoPanel);
-        phaseText.text = "前任回声：选择当前局强化，或带回村庄研究";
+        phaseText.text = "前任回声";
         echoView.Bind(echo, delegate
         {
             flow.ResolveVisibleEcho(true);
@@ -348,7 +376,7 @@ public class PhaseOnePrototypeController : MonoBehaviour
     private void ShowSummary()
     {
         SetActive(summaryPanel);
-        phaseText.text = "死亡结算：前任行动已改变村庄和下一任目标";
+        phaseText.text = "结算";
         summaryView.Bind(flow.CurrentTraveler, lastGeneratedEcho, flow.Village, ShowVillage, delegate
         {
             flow.StartNewTraveler();
@@ -382,6 +410,9 @@ public class PhaseOnePrototypeController : MonoBehaviour
         battlePanel.SetActive(activePanel == battlePanel);
         echoPanel.SetActive(activePanel == echoPanel);
         summaryPanel.SetActive(activePanel == summaryPanel);
+        bool isBattle = activePanel == battlePanel;
+        titleText.gameObject.SetActive(!isBattle);
+        phaseText.gameObject.SetActive(!isBattle);
     }
 
     private GameObject CreateContentPanel(Transform parent, string name)
@@ -392,6 +423,30 @@ public class PhaseOnePrototypeController : MonoBehaviour
         image.color = new Color(0.13f, 0.15f, 0.19f, 0.96f);
         SetRect(panel.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -28f), new Vector2(1220f, 720f));
         return panel;
+    }
+
+    private void ConfigureBattlePanelAsCanvasSpace()
+    {
+        RectTransform rect = battlePanel.GetComponent<RectTransform>();
+        SetRect(rect, Stretch(), Stretch(), new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+        Image image = battlePanel.GetComponent<Image>();
+        image.color = new Color(0f, 0f, 0f, 0f);
+        image.raycastTarget = false;
+    }
+
+    private Transform CreateCardHandRoot(Transform parent, string name, Vector2 anchoredPosition, Vector2 size)
+    {
+        GameObject root = new GameObject(name, typeof(RectTransform), typeof(HorizontalLayoutGroup));
+        root.transform.SetParent(parent, false);
+        SetRect(root.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), anchoredPosition, size);
+        HorizontalLayoutGroup layout = root.GetComponent<HorizontalLayoutGroup>();
+        layout.spacing = 18f;
+        layout.childControlHeight = false;
+        layout.childControlWidth = false;
+        layout.childForceExpandHeight = false;
+        layout.childForceExpandWidth = false;
+        layout.childAlignment = TextAnchor.MiddleCenter;
+        return root.transform;
     }
 
     private Transform CreateButtonRoot(Transform parent, string name, Vector2 anchoredPosition, Vector2 size)
@@ -407,6 +462,30 @@ public class PhaseOnePrototypeController : MonoBehaviour
         layout.childForceExpandWidth = false;
         layout.childAlignment = TextAnchor.MiddleCenter;
         return root.transform;
+    }
+
+    private Transform CreateMapNodeRoot(Transform parent, string name, Vector2 anchoredPosition, Vector2 size)
+    {
+        GameObject root = new GameObject(name, typeof(RectTransform));
+        root.transform.SetParent(parent, false);
+        SetRect(root.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), anchoredPosition, size);
+        return root.transform;
+    }
+
+    private static Sprite LoadChapterOneMapBackground()
+    {
+#if UNITY_EDITOR
+        Object[] assets = AssetDatabase.LoadAllAssetsAtPath(ChapterOneMapBackgroundPath);
+        for (int i = 0; i < assets.Length; i++)
+        {
+            Sprite sprite = assets[i] as Sprite;
+            if (sprite != null)
+            {
+                return sprite;
+            }
+        }
+#endif
+        return null;
     }
 
     private Text CreatePanelText(Transform parent, string name, Vector2 anchoredPosition, Vector2 size)
@@ -436,6 +515,59 @@ public class PhaseOnePrototypeController : MonoBehaviour
         text.rectTransform.offsetMin = new Vector2(8f, 8f);
         text.rectTransform.offsetMax = new Vector2(-8f, -8f);
         return button;
+    }
+
+    private Button CreateBattleSideButton(Transform parent, string name, string label, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 size, Color color)
+    {
+        Button button = CreateButton(parent, name, label, Vector2.zero, size, color);
+        SetRect(button.GetComponent<RectTransform>(), anchorMin, anchorMax, pivot, anchoredPosition, size);
+        return button;
+    }
+
+    private Button CreateBattleCardButton(Transform parent, CardData card)
+    {
+        Sprite cardSprite = LoadCardSprite(card);
+        GameObject buttonObject = new GameObject(card.Name, typeof(RectTransform), typeof(Image), typeof(Button));
+        buttonObject.transform.SetParent(parent, false);
+        RectTransform buttonRect = buttonObject.GetComponent<RectTransform>();
+        buttonRect.sizeDelta = new Vector2(168f, 224f);
+
+        Image background = buttonObject.GetComponent<Image>();
+        background.sprite = cardSprite;
+        background.color = cardSprite == null ? card.Tint : Color.white;
+        background.preserveAspect = true;
+
+        Button button = buttonObject.GetComponent<Button>();
+        ColorBlock colors = button.colors;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(1f, 1f, 1f, 0.92f);
+        colors.pressedColor = new Color(0.82f, 0.82f, 0.82f, 1f);
+        colors.disabledColor = new Color(0.42f, 0.42f, 0.42f, 0.55f);
+        button.colors = colors;
+
+        return button;
+    }
+
+    private Sprite LoadCardSprite(CardData card)
+    {
+        if (card == null || string.IsNullOrEmpty(card.ArtPath))
+        {
+            return null;
+        }
+
+        if (cardSprites.TryGetValue(card.ArtPath, out Sprite cachedSprite))
+        {
+            return cachedSprite;
+        }
+
+        Sprite sprite = Resources.Load<Sprite>(card.ArtPath);
+        if (sprite == null)
+        {
+            Debug.LogWarning("未找到手牌素材: Resources/" + card.ArtPath);
+        }
+
+        cardSprites[card.ArtPath] = sprite;
+        return sprite;
     }
 
     private Text CreateText(Transform parent, string name, string value, int size, FontStyle style, Color color)

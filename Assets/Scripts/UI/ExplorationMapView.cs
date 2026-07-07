@@ -79,6 +79,19 @@ public class ExplorationMapView : MonoBehaviour
 
             MapNodeIntel node = reachable[i];
             string nodeId = node.NodeId;
+            RectTransform rect = button.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                rect.anchoredPosition = node.MapPosition;
+                rect.sizeDelta = new Vector2(132f, 56f);
+            }
+
+            Image image = button.GetComponent<Image>();
+            if (image != null)
+            {
+                image.color = GetNodeColor(node.DisplayedNodeType);
+            }
+
             Text label = button.GetComponentInChildren<Text>();
             SetText(label, BuildButtonLabel(node));
             button.onClick.AddListener(delegate
@@ -152,7 +165,47 @@ public class ExplorationMapView : MonoBehaviour
             return "进入未知节点";
         }
 
-        return "进入 " + EmptyToUnknown(node.NodeId) + " / " + node.DisplayedNodeType;
+        return GetNodeTypeLabel(node.DisplayedNodeType) + "\n" + EmptyToUnknown(node.NodeId);
+    }
+
+    private static string GetNodeTypeLabel(MapNodeType type)
+    {
+        switch (type)
+        {
+            case MapNodeType.Battle:
+                return "战斗";
+            case MapNodeType.Event:
+                return "事件";
+            case MapNodeType.Rest:
+                return "营地";
+            case MapNodeType.LegacyEcho:
+                return "回声";
+            case MapNodeType.RegionEnd:
+                return "终点";
+            case MapNodeType.Start:
+                return "起点";
+            default:
+                return "节点";
+        }
+    }
+
+    private static Color GetNodeColor(MapNodeType type)
+    {
+        switch (type)
+        {
+            case MapNodeType.Battle:
+                return new Color(0.62f, 0.22f, 0.24f);
+            case MapNodeType.Event:
+                return new Color(0.38f, 0.42f, 0.62f);
+            case MapNodeType.Rest:
+                return new Color(0.24f, 0.50f, 0.38f);
+            case MapNodeType.LegacyEcho:
+                return new Color(0.48f, 0.32f, 0.66f);
+            case MapNodeType.RegionEnd:
+                return new Color(0.70f, 0.56f, 0.26f);
+            default:
+                return new Color(0.32f, 0.42f, 0.54f);
+        }
     }
 
     private static string EmptyToUnknown(string value)
